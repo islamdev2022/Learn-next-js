@@ -1,47 +1,63 @@
-"use client"
-import { useState,ChangeEvent,FormEvent } from "react";
-import { db } from "../../lib/backend/db/index";
-import { eq } from "drizzle-orm";
-import { usersTable } from "../../lib/backend/db/schema";
-interface FormData {
-    name: string;
-    age: number;
-    email: string;
-  }
-export default async function Form(){
-    const [formData, setFormData] = useState<FormData>({
-        name: "",
-        age: 0,
-        email: ""
-      });
-      const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setFormData({
-          ...formData,
-          [e.target.name]: e.target.value
-        });
-      };
+"use client";
+import { useState, ChangeEvent, FormEvent } from "react";
+import { create_user } from "@/app/about/actions";
 
-      const handleSubmit = async (e: FormEvent) => {
-        e.preventDefault();
-        
-      await db.insert(usersTable).values([{
-          name: formData.name,
-          age: formData.age,
-          email: formData.email
-      }])
-        
-      };
-    
-    
-    return (
-      <form  method="post">
-        <input type="text" name="name" placeholder="name" value={formData.name}
-        onChange={handleChange}/>
-        <input type="text" name="age" placeholder="age" value={formData.age}
-        onChange={handleChange}/>
-        <input type="text" name="email" placeholder="email" value={formData.email}
-        onChange={handleChange}/>
-        <button type="submit">Submit</button>
-      </form>
-    );
-} 
+interface FormData {
+  name: string;
+  age: string;
+  email: string;
+}
+
+export default function Form() {
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
+    age: "",
+    email: ""
+  });
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: name === "age" ? Number(value) : value
+    }));
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    console.log(formData);
+
+   
+    // await create_user(formData.name,formData.age.toString(),formData.email);
+
+    // Reset form data if needed
+    setFormData({ name: "", age: "", email: "" });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} method="post" className="text-black flex flex-col w-fit gap-5">
+      <input
+        type="text"
+        name="name"
+        placeholder="name"
+        value={formData.name}
+        onChange={handleChange}
+      />
+      <input
+        type="number"
+        name="age"
+        placeholder="age"
+        value={formData.age}
+        onChange={handleChange}
+      />
+      <input
+        type="email"
+        name="email"
+        placeholder="email"
+        value={formData.email}
+        onChange={handleChange}
+      />
+      <button type="submit" className="bg-white">Submit</button>
+    </form>
+  );
+}
